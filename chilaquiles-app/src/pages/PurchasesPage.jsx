@@ -1,17 +1,13 @@
 import React, { useState } from 'react';
 import { savePurchase } from '../api/firebase';
-
-const styles = {
-  form: { display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '400px', margin: 'auto' },
-  input: { padding: '10px', fontSize: '1rem' },
-  button: { padding: '15px', fontSize: '1.2rem', cursor: 'pointer', backgroundColor: '#28a745', color: 'white', border: 'none' },
-};
+import { Button, TextField, Select, MenuItem, FormControl, InputLabel, Box, Typography, Snackbar, Alert } from '@mui/material';
 
 function PurchasesPage() {
   const [item, setItem] = useState('');
   const [category, setCategory] = useState('otros');
   const [amount, setAmount] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState({ open: false, message: '', severity: 'success' });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,36 +23,51 @@ function PurchasesPage() {
 
     try {
       await savePurchase(purchaseData);
-      alert('Compra registrada con éxito!');
+      setFeedback({ open: true, message: 'Compra registrada con éxito!', severity: 'success' });
       // Limpiar formulario
       setItem('');
       setCategory('otros');
       setAmount('');
     } catch (error) {
       console.error("Error al guardar la compra: ", error);
-      alert('Error al registrar la compra.');
+      setFeedback({ open: true, message: 'Error al registrar la compra.', severity: 'error' });
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const handleCloseSnackbar = () => {
+    setFeedback({ ...feedback, open: false });
+  };
+
   return (
-    <form onSubmit={handleSubmit} style={styles.form}>
-      <h1>Registrar Compra</h1>
-      <input type="text" value={item} onChange={(e) => setItem(e.target.value)} placeholder="Insumo (ej. 1kg de pollo)" required style={styles.input} />
-      <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Monto Gastado" required style={styles.input} />
-      <select value={category} onChange={(e) => setCategory(e.target.value)} style={styles.input}>
-        <option value="tortilla">Tortilla</option>
-        <option value="salsa">Salsa</option>
-        <option value="proteina">Proteína</option>
-        <option value="gas">Gas</option>
-        <option value="desechables">Desechables</option>
-        <option value="otros">Otros</option>
-      </select>
-      <button type="submit" disabled={isSubmitting} style={styles.button}>
+    <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <Typography variant="h4" component="h1" gutterBottom>
+        Registrar Compra
+      </Typography>
+      <TextField label="Insumo (ej. 1kg de pollo)" variant="outlined" value={item} onChange={(e) => setItem(e.target.value)} required />
+      <TextField label="Monto Gastado" variant="outlined" type="number" value={amount} onChange={(e) => setAmount(e.target.value)} required />
+      <FormControl fullWidth>
+        <InputLabel id="category-select-label">Categoría</InputLabel>
+        <Select labelId="category-select-label" id="category-select" value={category} label="Categoría" onChange={(e) => setCategory(e.target.value)}>
+          <MenuItem value="tortilla">Tortilla</MenuItem>
+          <MenuItem value="salsa">Salsa</MenuItem>
+          <MenuItem value="proteina">Proteína</MenuItem>
+          <MenuItem value="gas">Gas</MenuItem>
+          <MenuItem value="desechables">Desechables</MenuItem>
+          <MenuItem value="otros">Otros</MenuItem>
+        </Select>
+      </FormControl>
+      <Button type="submit" variant="contained" color="primary" disabled={isSubmitting} sx={{ p: 1.5 }}>
         {isSubmitting ? 'Guardando...' : 'Guardar Compra'}
-      </button>
-    </form>
+      </Button>
+
+      <Snackbar open={feedback.open} autoHideDuration={3000} onClose={handleCloseSnackbar}>
+        <Alert onClose={handleCloseSnackbar} severity={feedback.severity} sx={{ width: '100%' }}>
+          {feedback.message}
+        </Alert>
+      </Snackbar>
+    </Box>
   );
 }
 

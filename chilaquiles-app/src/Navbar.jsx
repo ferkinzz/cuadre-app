@@ -1,13 +1,8 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from './useAuth';
 import { auth } from './api/firebase';
-
-const styles = {
-  nav: { display: 'flex', justifyContent: 'space-around', alignItems: 'center', padding: '1rem', backgroundColor: '#f8f9fa', borderBottom: '1px solid #dee2e6' },
-  link: { textDecoration: 'none', color: '#007bff', fontSize: '1.2rem' },
-  button: { cursor: 'pointer', padding: '8px 12px', border: 'none', borderRadius: '4px', backgroundColor: '#dc3545', color: 'white' },
-};
+import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
 
 function Navbar() {
   const { user } = useAuth();
@@ -23,12 +18,27 @@ function Navbar() {
   }
 
   return (
-    <nav style={styles.nav}>
-      <Link to="/" style={styles.link}>Resumen</Link>
-      <Link to="/ventas" style={styles.link}>Ventas</Link>
-      <Link to="/compras" style={styles.link}>Compras</Link>
-      <button onClick={handleLogout} style={styles.button}>Cerrar Sesión</button>
-    </nav>
+    <AppBar position="static">
+      <Toolbar>
+        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+          Chilaquiles App
+        </Typography>
+        <Box>
+          <Button color="inherit" component={NavLink} to="/">
+            Resumen
+          </Button>
+          <Button color="inherit" component={NavLink} to="/ventas">
+            Ventas
+          </Button>
+          <Button color="inherit" component={NavLink} to="/compras">
+            Compras
+          </Button>
+          <Button color="inherit" onClick={handleLogout}>
+            Cerrar Sesión
+          </Button>
+        </Box>
+      </Toolbar>
+    </AppBar>
   );
 }
 
