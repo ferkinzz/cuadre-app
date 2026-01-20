@@ -9,8 +9,8 @@ const styles = {
 };
 
 const PRODUCT_PRICES = {
-  verdes: 80,
-  rojos: 80,
+  verdes: 50,
+  rojos: 50,
   especiales: 100,
 };
 
