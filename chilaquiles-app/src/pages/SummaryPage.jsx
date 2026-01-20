@@ -1,18 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { getDailyData } from '../api/firebase';
-
-const styles = {
-  summary: { maxWidth: '600px', margin: 'auto', textAlign: 'center' },
-  card: { border: '1px solid #ccc', padding: '20px', margin: '10px 0', borderRadius: '8px' },
-  total: { fontSize: '2rem', fontWeight: 'bold' },
-  profit: { color: 'green' },
-  loss: { color: 'red' },
-};
+import { Card, CardContent, Typography, Grid, Box, CircularProgress } from '@mui/material';
 
 function SummaryPage() {
   const [dailySales, setDailySales] = useState(0);
   const [dailyPurchases, setDailyPurchases] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -26,37 +19,55 @@ function SummaryPage() {
       } catch (error) {
         console.error("Error obteniendo datos del día:", error);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
     fetchData();
   }, []);
 
-  if (loading) {
-    return <p>Cargando resumen del día...</p>;
+  if (isLoading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
   }
 
   const estimatedProfit = dailySales - dailyPurchases;
 
   return (
-    <div style={styles.summary}>
-      <h1>Resumen del Día</h1>
-      <div style={styles.card}>
-        <h2>Ventas Totales</h2>
-        <p style={{ ...styles.total, color: '#007bff' }}>${dailySales.toFixed(2)}</p>
-      </div>
-      <div style={styles.card}>
-        <h2>Compras Totales</h2>
-        <p style={{ ...styles.total, color: '#dc3545' }}>${dailyPurchases.toFixed(2)}</p>
-      </div>
-      <div style={styles.card}>
-        <h2>Ganancia Estimada</h2>
-        <p style={{ ...styles.total, ...(estimatedProfit >= 0 ? styles.profit : styles.loss) }}>
-          ${estimatedProfit.toFixed(2)}
-        </p>
-      </div>
-    </div>
+    <Box>
+      <Typography variant="h4" component="h1" gutterBottom>
+        Resumen del Día
+      </Typography>
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={4}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" color="text.secondary">Ventas Totales</Typography>
+              <Typography variant="h4" component="p" color="primary">${dailySales.toFixed(2)}</Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" color="text.secondary">Compras Totales</Typography>
+              <Typography variant="h4" component="p" color="error">${dailyPurchases.toFixed(2)}</Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" color="text.secondary">Ganancia Estimada</Typography>
+              <Typography variant="h4" component="p" color={estimatedProfit >= 0 ? 'success.main' : 'error.main'}>${estimatedProfit.toFixed(2)}</Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+    </Box>
   );
 }
 

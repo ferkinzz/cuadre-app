@@ -7,6 +7,7 @@ import SalesPage from './pages/SalesPage';
 import PurchasesPage from './pages/PurchasesPage';
 import SummaryPage from './pages/SummaryPage';
 import Navbar from './Navbar';
+import { Container } from '@mui/material';
 
 function App() {
   console.log('[App.jsx] Renderizando componente App y su enrutador.');
@@ -24,13 +25,13 @@ function App() {
             element={
               <ProtectedRoute>
                 <Navbar />
-                <main style={{ padding: '1rem' }}>
+                <Container component="main" sx={{ mt: 4, mb: 4 }}>
                   <Routes>
                     <Route path="/" element={<SummaryPage />} />
                     <Route path="/ventas" element={<SalesPage />} />
                     <Route path="/compras" element={<PurchasesPage />} />
                   </Routes>
-                </main>
+                </Container>
               </ProtectedRoute>
             }
           />
