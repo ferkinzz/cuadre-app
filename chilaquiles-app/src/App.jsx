@@ -1,12 +1,12 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './components/AuthProvider';
-import ProtectedRoute from './components/ProtectedRoute';
-import Login from './components/Login';
+import { AuthProvider } from './AuthProvider';
+import ProtectedRoute from './ProtectedRoute';
+import Login from './Login';
 import SalesPage from './pages/SalesPage';
 import PurchasesPage from './pages/PurchasesPage';
 import SummaryPage from './pages/SummaryPage';
-import Navbar from './components/Navbar';
+import Navbar from './Navbar';
 
 function App() {
   return (
