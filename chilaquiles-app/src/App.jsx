@@ -9,20 +9,34 @@ import SummaryPage from './pages/SummaryPage';
 import Navbar from './Navbar';
 
 function App() {
+  console.log('[App.jsx] Renderizando componente App y su enrutador.');
+
   return (
-    <AuthProvider>
-      <Router>
-        <Navbar />
-        <main style={{ padding: '1rem' }}>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/" element={<ProtectedRoute><SummaryPage /></ProtectedRoute>} />
-            <Route path="/ventas" element={<ProtectedRoute><SalesPage /></ProtectedRoute>} />
-            <Route path="/compras" element={<ProtectedRoute><PurchasesPage /></ProtectedRoute>} />
-          </Routes>
-        </main>
-      </Router>
-    </AuthProvider>
+    <Router>
+      <AuthProvider>
+        <Routes>
+          {/* Ruta pública para el login */}
+          <Route path="/login" element={<Login />} />
+
+          {/* Rutas privadas que requieren autenticación */}
+          <Route
+            path="/*"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <main style={{ padding: '1rem' }}>
+                  <Routes>
+                    <Route path="/" element={<SummaryPage />} />
+                    <Route path="/ventas" element={<SalesPage />} />
+                    <Route path="/compras" element={<PurchasesPage />} />
+                  </Routes>
+                </main>
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </AuthProvider>
+    </Router>
   );
 }
 

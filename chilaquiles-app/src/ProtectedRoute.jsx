@@ -5,7 +5,15 @@ import { useAuth } from './useAuth';
 const ProtectedRoute = ({ children }) => {
   const { user } = useAuth();
 
-  return user ? children : <Navigate to="/login" />;
+  console.log('[ProtectedRoute.jsx] Verificando usuario.', { user });
+
+  if (user) {
+    console.log('[ProtectedRoute.jsx] Usuario autenticado. Renderizando hijos.');
+    return children;
+  }
+
+  console.log('[ProtectedRoute.jsx] Usuario NO autenticado. Redirigiendo a /login.');
+  return <Navigate to="/login" />;
 };
 
 export default ProtectedRoute;

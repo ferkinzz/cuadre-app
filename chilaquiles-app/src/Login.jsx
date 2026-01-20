@@ -15,6 +15,8 @@ function Login() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  console.log('[Login.jsx] Renderizando formulario de Login.');
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
