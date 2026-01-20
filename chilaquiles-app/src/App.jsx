@@ -6,6 +6,7 @@ import Login from './Login';
 import SalesPage from './pages/SalesPage';
 import PurchasesPage from './pages/PurchasesPage';
 import SummaryPage from './pages/SummaryPage';
+import HistoricalDataPage from './pages/HistoricalDataPage';
 import Navbar from './Navbar';
 import { Container } from '@mui/material';
 
@@ -30,6 +31,7 @@ function App() {
                     <Route path="/" element={<SummaryPage />} />
                     <Route path="/ventas" element={<SalesPage />} />
                     <Route path="/compras" element={<PurchasesPage />} />
+                    <Route path="/datos" element={<HistoricalDataPage />} />
                   </Routes>
                 </Container>
               </ProtectedRoute>

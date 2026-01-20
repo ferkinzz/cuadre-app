@@ -104,6 +104,57 @@ const getDailyData = async () => {
   return { orders, purchases };
 };
 
+/**
+ * Obtiene datos de un período de tiempo (semana, mes, año) o todos los datos.
+ * @param {string} period - 'week', 'month', 'year', o 'total'
+ */
+export const getHistoricalData = async (period) => {
+  const now = new Date();
+  let startDate;
+
+  // Definir la fecha de inicio según el período
+  if (period === 'week') {
+    const firstDayOfWeek = now.getDate() - now.getDay();
+    startDate = new Date(now.setDate(firstDayOfWeek));
+    startDate.setHours(0, 0, 0, 0);
+  } else if (period === 'month') {
+    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+  } else if (period === 'year') {
+    startDate = new Date(now.getFullYear(), 0, 1);
+  }
+
+  // Construir las queries
+  let ordersQuery;
+  let purchasesQuery;
+
+  if (period === 'total') {
+    ordersQuery = query(collection(db, 'orders'));
+    purchasesQuery = query(collection(db, 'purchases'));
+  } else {
+    ordersQuery = query(
+      collection(db, 'orders'),
+      where('createdAt', '>=', startDate)
+    );
+    purchasesQuery = query(
+      collection(db, 'purchases'),
+      where('date', '>=', startDate)
+    );
+  }
+
+  const [ordersSnapshot, purchasesSnapshot] = await Promise.all([
+    getDocs(ordersQuery),
+    getDocs(purchasesQuery),
+  ]);
+
+  const orders = ordersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  const purchases = purchasesSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+  // Ordenar compras por fecha para una mejor visualización
+  purchases.sort((a, b) => b.date.toDate() - a.date.toDate());
+
+  return { orders, purchases };
+};
+
 export {
   auth,
   db,

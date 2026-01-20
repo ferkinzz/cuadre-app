@@ -33,7 +33,7 @@ function Navbar() {
     <AppBar position="static">
       <Toolbar>
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          Mr Lonche
+            Mr Lonche
         </Typography>
 
         {/* Menú para pantallas grandes */}
@@ -46,6 +46,9 @@ function Navbar() {
           </Button>
           <Button color="inherit" component={NavLink} to="/compras">
             Compras
+          </Button>
+          <Button color="inherit" component={NavLink} to="/datos">
+            Análisis
           </Button>
           <Button color="inherit" onClick={handleLogout}>
             Cerrar Sesión
@@ -82,6 +85,7 @@ function Navbar() {
             <MenuItem component={NavLink} to="/" onClick={handleMenuClose}>Resumen</MenuItem>
             <MenuItem component={NavLink} to="/ventas" onClick={handleMenuClose}>Ventas</MenuItem>
             <MenuItem component={NavLink} to="/compras" onClick={handleMenuClose}>Compras</MenuItem>
+            <MenuItem component={NavLink} to="/datos" onClick={handleMenuClose}>Análisis</MenuItem>
             <MenuItem onClick={handleLogout}>Cerrar Sesión</MenuItem>
           </Menu>
         </Box>
