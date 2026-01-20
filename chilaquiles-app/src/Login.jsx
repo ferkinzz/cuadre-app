@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { login } from '../api/firebase';
+import { login } from './api/firebase';
 
 const styles = {
   container: { display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '400px', margin: 'auto', padding: '2rem', border: '1px solid #ccc', borderRadius: '8px' },

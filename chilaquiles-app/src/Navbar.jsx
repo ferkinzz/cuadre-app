@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import { auth } from '../api/firebase';
+import { useAuth } from './useAuth';
+import { auth } from './api/firebase';
 
 const styles = {
   nav: { display: 'flex', justifyContent: 'space-around', alignItems: 'center', padding: '1rem', backgroundColor: '#f8f9fa', borderBottom: '1px solid #dee2e6' },
