@@ -4,6 +4,8 @@ import App from './App.jsx';
 // Puedes tener un archivo de estilos globales como index.css
 import './index.css';
 
+console.log('[main.jsx] App está a punto de renderizarse.');
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <App />
