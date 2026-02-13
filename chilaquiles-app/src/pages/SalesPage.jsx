@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { saveOrder } from '../api/firebase';
-import { Button, Box, Typography, Snackbar, Alert, Grid } from '@mui/material';
+import { Button, Box, Typography, Snackbar, Alert, Grid, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 
 const PRODUCT_PRICES = {
   verdes: 50,
@@ -10,10 +10,11 @@ const PRODUCT_PRICES = {
 
 function SalesPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [quantity, setQuantity] = useState(1);
   const [feedback, setFeedback] = useState({ open: false, message: '', severity: 'success' });
 
   const handleSale = async (type, price, payment) => {
-    if (isSubmitting) return;
+    if (isSubmitting || quantity <= 0) return;
     setIsSubmitting(true);
     
     const orderData = {
@@ -24,8 +25,15 @@ function SalesPage() {
     };
 
     try {
-      await saveOrder(orderData);
-      setFeedback({ open: true, message: `Venta de ${type} (${payment}) registrada!`, severity: 'success' });
+      const salePromises = [];
+      for (let i = 0; i < quantity; i++) {
+        salePromises.push(saveOrder(orderData));
+      }
+      await Promise.all(salePromises);
+
+      const message = quantity > 1 ? `${quantity} ventas de ${type} (${payment}) registradas!` : `Venta de ${type} (${payment}) registrada!`;
+      setFeedback({ open: true, message, severity: 'success' });
+      setQuantity(1); // Reset quantity after successful sale
     } catch (error) {
       console.error("Error al guardar la venta: ", error);
       setFeedback({ open: true, message: 'Error al registrar la venta.', severity: 'error' });
@@ -57,6 +65,18 @@ function SalesPage() {
       <Typography variant="h4" component="h1" gutterBottom>
         Registrar Venta
       </Typography>
+
+      <FormControl fullWidth sx={{ mb: 2 }}>
+        <InputLabel id="quantity-select-label">Cantidad</InputLabel>
+        <Select
+          labelId="quantity-select-label"
+          value={quantity}
+          label="Cantidad"
+          onChange={(e) => setQuantity(e.target.value)}
+        >
+          {[...Array(10).keys()].map(i => <MenuItem key={i + 1} value={i + 1}>{i + 1}</MenuItem>)}
+        </Select>
+      </FormControl>
 
       {renderSaleButtons('verdes', PRODUCT_PRICES.verdes)}
       {renderSaleButtons('rojos', PRODUCT_PRICES.rojos)}
