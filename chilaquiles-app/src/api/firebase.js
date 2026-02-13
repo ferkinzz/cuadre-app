@@ -110,24 +110,36 @@ const getDailyData = async () => {
  */
 export const getHistoricalData = async (period) => {
   const now = new Date();
-  let startDate;
-
-  // Definir la fecha de inicio según el período
-  if (period === 'week') {
-    const firstDayOfWeek = now.getDate() - now.getDay();
-    startDate = new Date(now.setDate(firstDayOfWeek));
-    startDate.setHours(0, 0, 0, 0);
-  } else if (period === 'month') {
-    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-  } else if (period === 'year') {
-    startDate = new Date(now.getFullYear(), 0, 1);
-  }
-
-  // Construir las queries
   let ordersQuery;
   let purchasesQuery;
 
-  if (period === 'total') {
+  if (period === 'day') {
+    const startOfDay = new Date(now.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(now.setHours(23, 59, 59, 999));
+
+    ordersQuery = query(
+      collection(db, 'orders'),
+      where('createdAt', '>=', startOfDay),
+      where('createdAt', '<=', endOfDay)
+    );
+    purchasesQuery = query(
+      collection(db, 'purchases'),
+      where('date', '>=', startOfDay),
+      where('date', '<=', endOfDay)
+    );
+  } else {
+    let startDate;
+    if (period === 'week') {
+      const firstDayOfWeek = now.getDate() - now.getDay();
+      startDate = new Date(now.setDate(firstDayOfWeek));
+      startDate.setHours(0, 0, 0, 0);
+    } else if (period === 'month') {
+      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    } else if (period === 'year') {
+      startDate = new Date(now.getFullYear(), 0, 1);
+    }
+
+    if (period === 'total') {
     ordersQuery = query(collection(db, 'orders'));
     purchasesQuery = query(collection(db, 'purchases'));
   } else {
@@ -139,6 +151,7 @@ export const getHistoricalData = async (period) => {
       collection(db, 'purchases'),
       where('date', '>=', startDate)
     );
+  }
   }
 
   const [ordersSnapshot, purchasesSnapshot] = await Promise.all([
