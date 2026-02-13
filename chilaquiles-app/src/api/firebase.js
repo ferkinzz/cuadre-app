@@ -130,9 +130,10 @@ export const getHistoricalData = async (period, date) => {
   } else {
     const now = new Date();
     let startDate;
-    if (period === 'week') {
-      const firstDayOfWeek = now.getDate() - now.getDay();
-      startDate = new Date(now.setDate(firstDayOfWeek));
+    if (period === 'week' || period === 'day') {
+      // Para 'week' y 'day', obtenemos los últimos 14 días
+      startDate = new Date();
+      startDate.setDate(now.getDate() - 13);
       startDate.setHours(0, 0, 0, 0);
     } else if (period === 'month') {
       startDate = new Date(now.getFullYear(), now.getMonth(), 1);

@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { getHistoricalData } from '../api/firebase';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import {
   Box,
@@ -27,11 +25,8 @@ const processDataForChart = (orders, period) => {
     const date = order.createdAt.toDate();
     let key;
 
-    if (period === 'day') {
+    if (period === 'day' || period === 'week' || period === 'month') {
       // Agrupar por día para la vista semanal o diaria
-      key = new Date(date.getFullYear(), date.getMonth(), date.getDate()).toISOString().split('T')[0];
-    } else if (period === 'month' || period === 'week') {
-      // Agrupar por día del mes
       key = new Date(date.getFullYear(), date.getMonth(), date.getDate()).toISOString().split('T')[0];
     } else if (period === 'year' || period === 'total') {
       // Agrupar por mes
@@ -62,7 +57,7 @@ const processDataForChart = (orders, period) => {
 };
 
 function HistoricalDataPage() {
-  const [period, setPeriod] = useState('day');
+  const [period, setPeriod] = useState('week');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [data, setData] = useState({ orders: [], purchases: [] });
   const [totals, setTotals] = useState({ sales: 0, purchases: 0 });
@@ -117,12 +112,6 @@ function HistoricalDataPage() {
           <ToggleButton value="year">Año</ToggleButton>
           <ToggleButton value="total">Total</ToggleButton>
         </ToggleButtonGroup>
-
-        {period === 'day' && (
-          <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <DatePicker label="Seleccionar fecha" value={selectedDate} onChange={handleDateChange} />
-          </LocalizationProvider>
-        )}
       </Box>
 
       {isLoading ? (
