@@ -108,14 +108,14 @@ const getDailyData = async () => {
  * Obtiene datos de un período de tiempo (semana, mes, año) o todos los datos.
  * @param {string} period - 'week', 'month', 'year', o 'total'
  */
-export const getHistoricalData = async (period) => {
-  const now = new Date();
+export const getHistoricalData = async (period, date) => {
   let ordersQuery;
   let purchasesQuery;
 
   if (period === 'day') {
-    const startOfDay = new Date(now.setHours(0, 0, 0, 0));
-    const endOfDay = new Date(now.setHours(23, 59, 59, 999));
+    const day = date || new Date();
+    const startOfDay = new Date(day.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(day.setHours(23, 59, 59, 999));
 
     ordersQuery = query(
       collection(db, 'orders'),
@@ -128,6 +128,7 @@ export const getHistoricalData = async (period) => {
       where('date', '<=', endOfDay)
     );
   } else {
+    const now = new Date();
     let startDate;
     if (period === 'week') {
       const firstDayOfWeek = now.getDate() - now.getDay();
