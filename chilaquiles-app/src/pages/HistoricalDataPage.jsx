@@ -210,33 +210,3 @@ function HistoricalDataPage() {
 }
 
 export default HistoricalDataPage;
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>Detalle de Gastos</Typography>
-                <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
-                  <List>
-                    {data.purchases.length > 0 ? (
-                      data.purchases.map((purchase, index) => (
-                        <React.Fragment key={purchase.id}>
-                          <ListItem>
-                            <ListItemText primary={purchase.item} secondary={`${purchase.category} - ${purchase.date.toDate().toLocaleDateString()}`} />
-                            <Typography variant="body1" color="error.main">${purchase.amount.toFixed(2)}</Typography>
-                          </ListItem>
-                          {index < data.purchases.length - 1 && <Divider />}
-                        </React.Fragment>
-                      ))
-                    ) : (
-                      <Typography sx={{ p: 2, textAlign: 'center' }}>No hay gastos registrados para este período.</Typography>
-                    )}
-                  </List>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
-      )}
-    </Box>
-  );
-}
-
-export default HistoricalDataPage;
