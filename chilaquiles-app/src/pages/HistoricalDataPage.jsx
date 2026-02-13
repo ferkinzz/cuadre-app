@@ -48,6 +48,7 @@ function HistoricalDataPage() {
   };
 
   const estimatedProfit = totals.sales - totals.purchases;
+  const totalOrders = data.orders.length;
 
   return (
     <Box>
@@ -75,6 +76,7 @@ function HistoricalDataPage() {
               <CardContent>
                 <Typography variant="h6" color="text.secondary">Ventas</Typography>
                 <Typography variant="h4" component="p" color="primary">${totals.sales.toFixed(2)}</Typography>
+                <Typography color="text.secondary">{totalOrders} órdenes</Typography>
               </CardContent>
             </Card>
           </Grid>
@@ -83,6 +85,7 @@ function HistoricalDataPage() {
               <CardContent>
                 <Typography variant="h6" color="text.secondary">Compras</Typography>
                 <Typography variant="h4" component="p" color="error">${totals.purchases.toFixed(2)}</Typography>
+                <Typography color="text.secondary">{totalOrders} órdenes</Typography>
               </CardContent>
             </Card>
           </Grid>
