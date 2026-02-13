@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 
 function HistoricalDataPage() {
-  const [period, setPeriod] = useState('week');
+  const [period, setPeriod] = useState('day');
   const [data, setData] = useState({ orders: [], purchases: [] });
   const [totals, setTotals] = useState({ sales: 0, purchases: 0 });
   const [isLoading, setIsLoading] = useState(true);
@@ -56,6 +56,7 @@ function HistoricalDataPage() {
       </Typography>
 
       <ToggleButtonGroup color="primary" value={period} exclusive onChange={handlePeriodChange} sx={{ mb: 3 }}>
+        <ToggleButton value="day">Día</ToggleButton>
         <ToggleButton value="week">Semana</ToggleButton>
         <ToggleButton value="month">Mes</ToggleButton>
         <ToggleButton value="year">Año</ToggleButton>
