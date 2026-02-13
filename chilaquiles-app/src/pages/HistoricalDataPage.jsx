@@ -27,13 +27,13 @@ const processDataForChart = (orders, period) => {
     const date = order.createdAt.toDate();
     let key;
 
-    if (period === 'day' || period === 'week') {
+    if (period === 'day') {
       // Agrupar por día para la vista semanal o diaria
       key = new Date(date.getFullYear(), date.getMonth(), date.getDate()).toISOString().split('T')[0];
-    } else if (period === 'month') {
+    } else if (period === 'month' || period === 'week') {
       // Agrupar por día del mes
       key = new Date(date.getFullYear(), date.getMonth(), date.getDate()).toISOString().split('T')[0];
-    } else if (period === 'year') {
+    } else if (period === 'year' || period === 'total') {
       // Agrupar por mes
       key = new Date(date.getFullYear(), date.getMonth(), 1).toISOString().split('T')[0];
     } else {
@@ -100,6 +100,7 @@ function HistoricalDataPage() {
 
   const estimatedProfit = totals.sales - totals.purchases;
   const totalOrders = data.orders.length;
+  const totalPurchasesCount = data.purchases.length;
   const chartData = processDataForChart(data.orders, period);
 
   return (
@@ -129,58 +130,86 @@ function HistoricalDataPage() {
           <CircularProgress />
         </Box>
       ) : (
-        <Grid container spacing={3}>
-          {/* Tarjetas de Resumen */}
-          <Grid item xs={12} md={4}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" color="text.secondary">Ventas</Typography>
-                <Typography variant="h4" component="p" color="primary">${totals.sales.toFixed(2)}</Typography>
-                <Typography color="text.secondary">{totalOrders} órdenes</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" color="text.secondary">Compras</Typography>
-                <Typography variant="h4" component="p" color="error">${totals.purchases.toFixed(2)}</Typography>
-                <Typography color="text.secondary">{totalOrders} órdenes</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" color="text.secondary">Ganancia</Typography>
-                <Typography variant="h4" component="p" color={estimatedProfit >= 0 ? 'success.main' : 'error.main'}>${estimatedProfit.toFixed(2)}</Typography>
-              </CardContent>
-            </Card>
+        <Box>
+          <Grid container spacing={3} sx={{ mb: 3 }}>
+            {/* Tarjetas de Resumen */}
+            <Grid item xs={12} md={4}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" color="text.secondary">Ventas</Typography>
+                  <Typography variant="h4" component="p" color="primary">${totals.sales.toFixed(2)}</Typography>
+                  <Typography color="text.secondary">{totalOrders} órdenes</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" color="text.secondary">Compras</Typography>
+                  <Typography variant="h4" component="p" color="error">${totals.purchases.toFixed(2)}</Typography>
+                  <Typography color="text.secondary">{totalPurchasesCount} compras</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" color="text.secondary">Ganancia</Typography>
+                  <Typography variant="h4" component="p" color={estimatedProfit >= 0 ? 'success.main' : 'error.main'}>${estimatedProfit.toFixed(2)}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
           </Grid>
 
           {/* Gráfico de Tendencia de Ventas */}
           {chartData.length > 0 && (
-            <Grid item xs={12}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>Tendencia de Ventas</Typography>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="date" />
-                      <YAxis />
-                      <Tooltip formatter={(value) => [`$${value.toFixed(2)}`, 'Ventas']} />
-                      <Legend />
-                      <Line type="monotone" dataKey="ventas" stroke="#8884d8" activeDot={{ r: 8 }} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            </Grid>
+            <Card sx={{ mb: 3 }}>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>Tendencia de Ventas</Typography>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" />
+                    <YAxis />
+                    <Tooltip formatter={(value) => [`$${value.toFixed(2)}`, 'Ventas']} />
+                    <Legend />
+                    <Line type="monotone" dataKey="ventas" stroke="#8884d8" activeDot={{ r: 8 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
           )}
 
           {/* Lista de Gastos */}
-          <Grid item xs={12}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>Detalle de Gastos</Typography>
+              <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
+                <List>
+                  {data.purchases.length > 0 ? (
+                    data.purchases.map((purchase, index) => (
+                      <React.Fragment key={purchase.id}>
+                        <ListItem>
+                          <ListItemText primary={purchase.item} secondary={`${purchase.category} - ${purchase.date.toDate().toLocaleDateString()}`} />
+                          <Typography variant="body1" color="error.main">${purchase.amount.toFixed(2)}</Typography>
+                        </ListItem>
+                        {index < data.purchases.length - 1 && <Divider />}
+                      </React.Fragment>
+                    ))
+                  ) : (
+                    <Typography sx={{ p: 2, textAlign: 'center' }}>No hay gastos registrados para este período.</Typography>
+                  )}
+                </List>
+              </Box>
+            </CardContent>
+          </Card>
+        </Box>
+      )}
+    </Box>
+  );
+}
+
+export default HistoricalDataPage;
             <Card>
               <CardContent>
                 <Typography variant="h6" gutterBottom>Detalle de Gastos</Typography>
