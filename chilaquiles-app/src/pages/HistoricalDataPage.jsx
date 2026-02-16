@@ -25,15 +25,19 @@ const processDataForChart = (orders, period) => {
     const date = order.createdAt.toDate();
     let key;
 
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
     if (period === 'day' || period === 'week' || period === 'month') {
       // Agrupar por día para la vista semanal o diaria
-      key = new Date(date.getFullYear(), date.getMonth(), date.getDate()).toISOString().split('T')[0];
+      key = `${year}-${month}-${day}`;
     } else if (period === 'year' || period === 'total') {
       // Agrupar por mes
-      key = new Date(date.getFullYear(), date.getMonth(), 1).toISOString().split('T')[0];
+      key = `${year}-${month}-01`;
     } else {
       // Para 'total', agrupar por mes también puede ser una opción razonable
-      key = new Date(date.getFullYear(), date.getMonth(), 1).toISOString().split('T')[0];
+      key = `${year}-${month}-01`;
     }
 
     salesByDate.set(key, (salesByDate.get(key) || 0) + order.price);
