@@ -14,7 +14,6 @@ import {
   onAuthStateChanged,
 } from "firebase/auth";
 
-// Tu configuración de Firebase (reemplaza con tus datos)
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -24,14 +23,12 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-// Verificación para desarrolladores: Lanza un error si las variables de entorno no están configuradas.
 if (!firebaseConfig.apiKey) {
   throw new Error(
     "VITE_FIREBASE_API_KEY no está definida. Revisa tus variables de entorno (.env.local o la configuración de despliegue)."
   );
 }
 
-// Inicializar Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
@@ -49,111 +46,107 @@ const onAuthChange = (callback) => {
 
 /**
  * Guarda una nueva venta en la colección 'orders'
- * @param {object} orderData - Datos de la venta
  */
 const saveOrder = (orderData) => {
-  const orderWithTimestamp = {
+  return addDoc(collection(db, "orders"), {
     ...orderData,
     createdAt: Timestamp.fromDate(new Date()),
-  };
-  return addDoc(collection(db, "orders"), orderWithTimestamp);
+  });
 };
 
 /**
  * Guarda una nueva compra en la colección 'purchases'
- * @param {object} purchaseData - Datos de la compra
  */
 const savePurchase = (purchaseData) => {
-  const purchaseWithTimestamp = {
+  return addDoc(collection(db, "purchases"), {
     ...purchaseData,
-    date: Timestamp.fromDate(new Date(purchaseData.date)), // Asegurarse que la fecha es un Timestamp
-  };
-  return addDoc(collection(db, "purchases"), purchaseWithTimestamp);
+    date: Timestamp.fromDate(new Date(purchaseData.date)),
+  });
 };
 
 /**
- * Obtiene las ventas y compras para una fecha específica (hoy)
+ * Obtiene las ventas y compras del día de hoy.
  */
 const getDailyData = async () => {
-  const today = new Date();
-  const startOfDay = new Date(today.setHours(0, 0, 0, 0));
-  const endOfDay = new Date(today.setHours(23, 59, 59, 999));
-
-  // Query para ventas del día
-  const ordersQuery = query(
-    collection(db, "orders"),
-    where("createdAt", ">=", startOfDay),
-    where("createdAt", "<=", endOfDay)
-  );
-
-  // Query para compras del día
-  const purchasesQuery = query(
-    collection(db, "purchases"),
-    where("date", ">=", startOfDay),
-    where("date", "<=", endOfDay)
-  );
+  const { startDate, endDate } = getDateRange("day", new Date());
 
   const [ordersSnapshot, purchasesSnapshot] = await Promise.all([
-    getDocs(ordersQuery),
-    getDocs(purchasesQuery),
+    getDocs(query(collection(db, "orders"), where("createdAt", ">=", startDate), where("createdAt", "<=", endDate))),
+    getDocs(query(collection(db, "purchases"), where("date", ">=", startDate), where("date", "<=", endDate))),
   ]);
 
-  const orders = ordersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-  const purchases = purchasesSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-
-  return { orders, purchases };
+  return {
+    orders: ordersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })),
+    purchases: purchasesSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })),
+  };
 };
 
 /**
- * Obtiene datos de un período de tiempo (semana, mes, año) o todos los datos.
- * @param {string} period - 'week', 'month', 'year', o 'total'
+ * Helper: calcula el rango de fechas según el período.
+ * @param {string} period - 'day', 'week', 'month', 'year', o 'total'
+ * @param {Date} [date] - Fecha de referencia (solo relevante para 'day')
+ * @returns {{ startDate: Date|null, endDate: Date|null }}
+ */
+const getDateRange = (period, date = new Date()) => {
+  if (period === "total") {
+    return { startDate: null, endDate: null };
+  }
+
+  if (period === "day") {
+    const start = new Date(date);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(date);
+    end.setHours(23, 59, 59, 999);
+    return { startDate: start, endDate: end };
+  }
+
+  const now = new Date();
+  let startDate;
+
+  if (period === "week") {
+    startDate = new Date(now);
+    startDate.setDate(now.getDate() - 6);
+    startDate.setHours(0, 0, 0, 0);
+  } else if (period === "month") {
+    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+  } else if (period === "year") {
+    startDate = new Date(now.getFullYear(), 0, 1);
+  }
+
+  return { startDate, endDate: null };
+};
+
+/**
+ * Obtiene datos históricos para un período dado.
+ * @param {string} period - 'day', 'week', 'month', 'year', o 'total'
+ * @param {Date} [date] - Fecha de referencia (solo se usa cuando period === 'day')
  */
 export const getHistoricalData = async (period, date) => {
+  const { startDate, endDate } = getDateRange(period, date);
+
   let ordersQuery;
   let purchasesQuery;
 
-  if (period === 'day') {
-    const day = date || new Date();
-    const startOfDay = new Date(day.setHours(0, 0, 0, 0));
-    const endOfDay = new Date(day.setHours(23, 59, 59, 999));
-
+  if (!startDate) {
+    // 'total': sin filtro de fecha
+    ordersQuery = query(collection(db, "orders"));
+    purchasesQuery = query(collection(db, "purchases"));
+  } else if (endDate) {
+    // 'day': rango cerrado
     ordersQuery = query(
-      collection(db, 'orders'),
-      where('createdAt', '>=', startOfDay),
-      where('createdAt', '<=', endOfDay)
+      collection(db, "orders"),
+      where("createdAt", ">=", startDate),
+      where("createdAt", "<=", endDate)
     );
     purchasesQuery = query(
-      collection(db, 'purchases'),
-      where('date', '>=', startOfDay),
-      where('date', '<=', endOfDay)
+      collection(db, "purchases"),
+      where("date", ">=", startDate),
+      where("date", "<=", endDate)
     );
   } else {
-    const now = new Date();
-    let startDate;
-    if (period === 'week' || period === 'day') {
-      // Para 'week' y 'day', obtenemos los últimos 14 días
-      startDate = new Date();
-      startDate.setDate(now.getDate() - 13);
-      startDate.setHours(0, 0, 0, 0);
-    } else if (period === 'month') {
-      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-    } else if (period === 'year') {
-      startDate = new Date(now.getFullYear(), 0, 1);
-    }
-
-    if (period === 'total') {
-    ordersQuery = query(collection(db, 'orders'));
-    purchasesQuery = query(collection(db, 'purchases'));
-  } else {
-    ordersQuery = query(
-      collection(db, 'orders'),
-      where('createdAt', '>=', startDate)
-    );
-    purchasesQuery = query(
-      collection(db, 'purchases'),
-      where('date', '>=', startDate)
-    );
-  }
+    // 'week', 'month', 'year': desde startDate hasta ahora
+    ordersQuery = query(collection(db, "orders"), where("createdAt", ">=", startDate));
+    purchasesQuery = query(collection(db, "purchases"), where("date", ">=", startDate));
   }
 
   const [ordersSnapshot, purchasesSnapshot] = await Promise.all([
@@ -162,10 +155,9 @@ export const getHistoricalData = async (period, date) => {
   ]);
 
   const orders = ordersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-  const purchases = purchasesSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-
-  // Ordenar compras por fecha para una mejor visualización
-  purchases.sort((a, b) => b.date.toDate() - a.date.toDate());
+  const purchases = purchasesSnapshot.docs
+    .map((doc) => ({ id: doc.id, ...doc.data() }))
+    .sort((a, b) => b.date.toDate() - a.date.toDate());
 
   return { orders, purchases };
 };
