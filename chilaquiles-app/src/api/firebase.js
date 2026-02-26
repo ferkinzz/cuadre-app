@@ -178,4 +178,6 @@ export {
   onAuthChange,
   saveOrder,
   savePurchase,
+  getDailyData,
+
 };
