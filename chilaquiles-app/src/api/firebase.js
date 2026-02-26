@@ -107,7 +107,37 @@ const getDateRange = (period, date = new Date()) => {
 
   return { startDate, endDate: null };
 };
+const getDailyData = async () => {
+  const { startDate, endDate } = getDateRange("day", new Date());
 
+  const [ordersSnapshot, purchasesSnapshot] = await Promise.all([
+    getDocs(
+      query(
+        collection(db, "orders"),
+        where("createdAt", ">=", startDate),
+        where("createdAt", "<=", endDate)
+      )
+    ),
+    getDocs(
+      query(
+        collection(db, "purchases"),
+        where("date", ">=", startDate),
+        where("date", "<=", endDate)
+      )
+    ),
+  ]);
+
+  return {
+    orders: ordersSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })),
+    purchases: purchasesSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })),
+  };
+};
 /* =======================
    FETCH HISTÓRICO
 ======================= */
