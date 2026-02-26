@@ -24,29 +24,35 @@ const firebaseConfig = {
 };
 
 if (!firebaseConfig.apiKey) {
-  throw new Error(
-    "VITE_FIREBASE_API_KEY no está definida. Revisa tus variables de entorno (.env.local o la configuración de despliegue)."
-  );
+  throw new Error("Falta API KEY Firebase");
 }
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// --- Funciones de Autenticación ---
-const login = (email, password) => {
-  return signInWithEmailAndPassword(auth, email, password);
+/* =======================
+   HELPER FECHA SEGURA
+======================= */
+const parseLocalDate = (str) => {
+  const [y, m, d] = str.split("-").map(Number);
+  return new Date(y, m - 1, d);
 };
 
-const onAuthChange = (callback) => {
-  return onAuthStateChanged(auth, callback);
-};
+/* =======================
+   AUTH
+======================= */
 
-// --- Funciones de la Base de Datos ---
+const login = (email, password) =>
+  signInWithEmailAndPassword(auth, email, password);
 
-/**
- * Guarda una nueva venta en la colección 'orders'
- */
+const onAuthChange = (callback) =>
+  onAuthStateChanged(auth, callback);
+
+/* =======================
+   GUARDAR DATA
+======================= */
+
 const saveOrder = (orderData) => {
   return addDoc(collection(db, "orders"), {
     ...orderData,
@@ -54,39 +60,19 @@ const saveOrder = (orderData) => {
   });
 };
 
-/**
- * Guarda una nueva compra en la colección 'purchases'
- */
 const savePurchase = (purchaseData) => {
   return addDoc(collection(db, "purchases"), {
     ...purchaseData,
-    date: Timestamp.fromDate(new Date(purchaseData.date)),
+
+    // FIX timezone
+    date: Timestamp.fromDate(parseLocalDate(purchaseData.date)),
   });
 };
 
-/**
- * Obtiene las ventas y compras del día de hoy.
- */
-const getDailyData = async () => {
-  const { startDate, endDate } = getDateRange("day", new Date());
+/* =======================
+   RANGO FECHAS
+======================= */
 
-  const [ordersSnapshot, purchasesSnapshot] = await Promise.all([
-    getDocs(query(collection(db, "orders"), where("createdAt", ">=", startDate), where("createdAt", "<=", endDate))),
-    getDocs(query(collection(db, "purchases"), where("date", ">=", startDate), where("date", "<=", endDate))),
-  ]);
-
-  return {
-    orders: ordersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })),
-    purchases: purchasesSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })),
-  };
-};
-
-/**
- * Helper: calcula el rango de fechas según el período.
- * @param {string} period - 'day', 'week', 'month', 'year', o 'total'
- * @param {Date} [date] - Fecha de referencia (solo relevante para 'day')
- * @returns {{ startDate: Date|null, endDate: Date|null }}
- */
 const getDateRange = (period, date = new Date()) => {
   if (period === "total") {
     return { startDate: null, endDate: null };
@@ -95,8 +81,10 @@ const getDateRange = (period, date = new Date()) => {
   if (period === "day") {
     const start = new Date(date);
     start.setHours(0, 0, 0, 0);
+
     const end = new Date(date);
     end.setHours(23, 59, 59, 999);
+
     return { startDate: start, endDate: end };
   }
 
@@ -106,21 +94,24 @@ const getDateRange = (period, date = new Date()) => {
   if (period === "week") {
     startDate = new Date(now);
     startDate.setDate(now.getDate() - 6);
-    startDate.setHours(0, 0, 0, 0);
-  } else if (period === "month") {
+  }
+  else if (period === "month") {
     startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-  } else if (period === "year") {
+  }
+  else if (period === "year") {
     startDate = new Date(now.getFullYear(), 0, 1);
   }
+
+  // FIX importante
+  startDate.setHours(0,0,0,0);
 
   return { startDate, endDate: null };
 };
 
-/**
- * Obtiene datos históricos para un período dado.
- * @param {string} period - 'day', 'week', 'month', 'year', o 'total'
- * @param {Date} [date] - Fecha de referencia (solo se usa cuando period === 'day')
- */
+/* =======================
+   FETCH HISTÓRICO
+======================= */
+
 export const getHistoricalData = async (period, date) => {
   const { startDate, endDate } = getDateRange(period, date);
 
@@ -128,25 +119,32 @@ export const getHistoricalData = async (period, date) => {
   let purchasesQuery;
 
   if (!startDate) {
-    // 'total': sin filtro de fecha
     ordersQuery = query(collection(db, "orders"));
     purchasesQuery = query(collection(db, "purchases"));
-  } else if (endDate) {
-    // 'day': rango cerrado
+  }
+  else if (endDate) {
     ordersQuery = query(
       collection(db, "orders"),
       where("createdAt", ">=", startDate),
       where("createdAt", "<=", endDate)
     );
+
     purchasesQuery = query(
       collection(db, "purchases"),
       where("date", ">=", startDate),
       where("date", "<=", endDate)
     );
-  } else {
-    // 'week', 'month', 'year': desde startDate hasta ahora
-    ordersQuery = query(collection(db, "orders"), where("createdAt", ">=", startDate));
-    purchasesQuery = query(collection(db, "purchases"), where("date", ">=", startDate));
+  }
+  else {
+    ordersQuery = query(
+      collection(db, "orders"),
+      where("createdAt", ">=", startDate)
+    );
+
+    purchasesQuery = query(
+      collection(db, "purchases"),
+      where("date", ">=", startDate)
+    );
   }
 
   const [ordersSnapshot, purchasesSnapshot] = await Promise.all([
@@ -154,13 +152,24 @@ export const getHistoricalData = async (period, date) => {
     getDocs(purchasesQuery),
   ]);
 
-  const orders = ordersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  const orders = ordersSnapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  }));
+
   const purchases = purchasesSnapshot.docs
-    .map((doc) => ({ id: doc.id, ...doc.data() }))
-    .sort((a, b) => b.date.toDate() - a.date.toDate());
+    .map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }))
+    .sort((a,b)=> b.date.toDate() - a.date.toDate());
 
   return { orders, purchases };
 };
+
+/* =======================
+   EXPORTS
+======================= */
 
 export {
   auth,
@@ -169,5 +178,4 @@ export {
   onAuthChange,
   saveOrder,
   savePurchase,
-  getDailyData,
 };
