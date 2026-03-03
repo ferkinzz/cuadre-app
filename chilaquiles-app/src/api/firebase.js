@@ -32,14 +32,6 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 /* =======================
-   HELPER FECHA SEGURA
-======================= */
-const parseLocalDate = (str) => {
-  const [y, m, d] = str.split("-").map(Number);
-  return new Date(y, m - 1, d);
-};
-
-/* =======================
    AUTH
 ======================= */
 
@@ -64,8 +56,7 @@ const savePurchase = (purchaseData) => {
   return addDoc(collection(db, "purchases"), {
     ...purchaseData,
 
-    // FIX timezone
-    date: Timestamp.fromDate(parseLocalDate(purchaseData.date)),
+    date: Timestamp.fromDate(purchaseData.date),
   });
 };
 
