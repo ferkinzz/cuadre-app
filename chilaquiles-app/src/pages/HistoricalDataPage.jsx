@@ -78,10 +78,17 @@ const processDataForChart = (orders, period) => {
     });
 };
 
+const toLocalDateStr = (date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
+
 function HistoricalDataPage() {
   const [period, setPeriod] = useState('week');
   const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split('T')[0]
+    () => toLocalDateStr(new Date())
   );
   const [data, setData] = useState({ orders: [], purchases: [] });
   const [isLoading, setIsLoading] = useState(true);
@@ -159,7 +166,7 @@ function HistoricalDataPage() {
             InputLabelProps={{ shrink: true }}
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
-            inputProps={{ max: new Date().toISOString().split('T')[0] }}
+            inputProps={{ max: toLocalDateStr(new Date()) }}
           />
         )}
       </Box>
