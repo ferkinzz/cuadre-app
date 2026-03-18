@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
 import { savePurchase } from '../api/firebase';
+import { useConfig } from '../ConfigContext';
 import { Button, TextField, Select, MenuItem, FormControl, InputLabel, Box, Typography, Snackbar, Alert } from '@mui/material';
 
 function PurchasesPage() {
+  const { config } = useConfig();
   const [item, setItem] = useState('');
-  const [category, setCategory] = useState('otros');
+  const [category, setCategory] = useState('');
   const [amount, setAmount] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState({ open: false, message: '', severity: 'success' });
+
+  // Si la categoría actual ya no existe en config, usar la primera disponible
+  const currentCategory = config.categories.includes(category) ? category : (config.categories[0] || '');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -16,17 +21,16 @@ function PurchasesPage() {
     setIsSubmitting(true);
     const purchaseData = {
       item,
-      category,
+      category: currentCategory,
       amount: parseFloat(amount),
-      date: new Date(), // Enviar el objeto Date completo
+      date: new Date(),
     };
 
     try {
       await savePurchase(purchaseData);
       setFeedback({ open: true, message: 'Compra registrada con éxito!', severity: 'success' });
-      // Limpiar formulario
       setItem('');
-      setCategory('otros');
+      setCategory('');
       setAmount('');
     } catch (error) {
       console.error("Error al guardar la compra: ", error);
@@ -34,10 +38,6 @@ function PurchasesPage() {
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const handleCloseSnackbar = () => {
-    setFeedback({ ...feedback, open: false });
   };
 
   return (
@@ -49,23 +49,23 @@ function PurchasesPage() {
       <TextField label="Monto Gastado" variant="outlined" type="number" value={amount} onChange={(e) => setAmount(e.target.value)} required />
       <FormControl fullWidth>
         <InputLabel id="category-select-label">Categoría</InputLabel>
-        <Select labelId="category-select-label" id="category-select" value={category} label="Categoría" onChange={(e) => setCategory(e.target.value)}>
-          <MenuItem value="tortilla">Tortilla</MenuItem>
-          <MenuItem value="salsa">Salsa</MenuItem>
-          <MenuItem value="proteina">Proteína</MenuItem>
-          <MenuItem value="gas">Gas</MenuItem>
-          <MenuItem value="desechables">Desechables</MenuItem>
-          <MenuItem value="otros">Otros</MenuItem>
+        <Select
+          labelId="category-select-label"
+          value={currentCategory}
+          label="Categoría"
+          onChange={(e) => setCategory(e.target.value)}
+        >
+          {config.categories.map(cat => (
+            <MenuItem key={cat} value={cat} sx={{ textTransform: 'capitalize' }}>{cat}</MenuItem>
+          ))}
         </Select>
       </FormControl>
       <Button type="submit" variant="contained" color="primary" disabled={isSubmitting} sx={{ p: 1.5 }}>
         {isSubmitting ? 'Guardando...' : 'Guardar Compra'}
       </Button>
 
-      <Snackbar open={feedback.open} autoHideDuration={3000} onClose={handleCloseSnackbar}>
-        <Alert onClose={handleCloseSnackbar} severity={feedback.severity} sx={{ width: '100%' }}>
-          {feedback.message}
-        </Alert>
+      <Snackbar open={feedback.open} autoHideDuration={3000} onClose={() => setFeedback(f => ({ ...f, open: false }))}>
+        <Alert severity={feedback.severity} sx={{ width: '100%' }}>{feedback.message}</Alert>
       </Snackbar>
     </Box>
   );

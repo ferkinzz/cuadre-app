@@ -1,14 +1,10 @@
 import React, { useState } from 'react';
 import { saveOrder } from '../api/firebase';
+import { useConfig } from '../ConfigContext';
 import { Button, Box, Typography, Snackbar, Alert, Grid, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 
-const PRODUCT_PRICES = {
-  verdes: 50,
-  rojos: 50,
-  especiales: 100,
-};
-
 function SalesPage() {
+  const { config } = useConfig();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [feedback, setFeedback] = useState({ open: false, message: '', severity: 'success' });
@@ -16,13 +12,8 @@ function SalesPage() {
   const handleSale = async (type, price, payment) => {
     if (isSubmitting || quantity <= 0) return;
     setIsSubmitting(true);
-    
-    const orderData = {
-      type,
-      price,
-      payment,
-      extras: [], // MVP simple, sin extras por ahora
-    };
+
+    const orderData = { type, price, payment, extras: [] };
 
     try {
       const salePromises = [];
@@ -31,9 +22,11 @@ function SalesPage() {
       }
       await Promise.all(salePromises);
 
-      const message = quantity > 1 ? `${quantity} ventas de ${type} (${payment}) registradas!` : `Venta de ${type} (${payment}) registrada!`;
+      const message = quantity > 1
+        ? `${quantity} ventas de ${type} (${payment}) registradas!`
+        : `Venta de ${type} (${payment}) registrada!`;
       setFeedback({ open: true, message, severity: 'success' });
-      setQuantity(1); // Reset quantity after successful sale
+      setQuantity(1);
     } catch (error) {
       console.error("Error al guardar la venta: ", error);
       setFeedback({ open: true, message: 'Error al registrar la venta.', severity: 'error' });
@@ -42,19 +35,19 @@ function SalesPage() {
     }
   };
 
-  const handleCloseSnackbar = () => {
-    setFeedback({ ...feedback, open: false });
-  };
-
-  const renderSaleButtons = (type, price) => (
-    <Box sx={{ mb: 2, p: 2, border: '1px solid grey', borderRadius: 2 }}>
-      <Typography variant="h6" gutterBottom textTransform="capitalize">{type}</Typography>
+  const renderSaleButtons = ({ id, name, price }) => (
+    <Box key={id} sx={{ mb: 2, p: 2, border: '1px solid grey', borderRadius: 2 }}>
+      <Typography variant="h6" gutterBottom textTransform="capitalize">{name}</Typography>
       <Grid container spacing={2}>
         <Grid item xs={6}>
-          <Button fullWidth variant="contained" color="primary" onClick={() => handleSale(type, price, 'efectivo')} disabled={isSubmitting} sx={{ p: 2, fontSize: '1.1rem' }}>Efectivo</Button>
+          <Button fullWidth variant="contained" color="primary" onClick={() => handleSale(name, price, 'efectivo')} disabled={isSubmitting} sx={{ p: 2, fontSize: '1.1rem' }}>
+            Efectivo
+          </Button>
         </Grid>
         <Grid item xs={6}>
-          <Button fullWidth variant="outlined" color="primary" onClick={() => handleSale(type, price, 'transferencia')} disabled={isSubmitting} sx={{ p: 2, fontSize: '1.1rem' }}>Transf.</Button>
+          <Button fullWidth variant="outlined" color="primary" onClick={() => handleSale(name, price, 'transferencia')} disabled={isSubmitting} sx={{ p: 2, fontSize: '1.1rem' }}>
+            Transf.
+          </Button>
         </Grid>
       </Grid>
     </Box>
@@ -78,14 +71,10 @@ function SalesPage() {
         </Select>
       </FormControl>
 
-      {renderSaleButtons('verdes', PRODUCT_PRICES.verdes)}
-      {renderSaleButtons('rojos', PRODUCT_PRICES.rojos)}
-      {renderSaleButtons('especiales', PRODUCT_PRICES.especiales)}
+      {config.products.map(renderSaleButtons)}
 
-      <Snackbar open={feedback.open} autoHideDuration={3000} onClose={handleCloseSnackbar}>
-        <Alert onClose={handleCloseSnackbar} severity={feedback.severity} sx={{ width: '100%' }}>
-          {feedback.message}
-        </Alert>
+      <Snackbar open={feedback.open} autoHideDuration={3000} onClose={() => setFeedback(f => ({ ...f, open: false }))}>
+        <Alert severity={feedback.severity} sx={{ width: '100%' }}>{feedback.message}</Alert>
       </Snackbar>
     </Box>
   );

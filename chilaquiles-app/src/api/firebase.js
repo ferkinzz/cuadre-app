@@ -7,6 +7,9 @@ import {
   where,
   getDocs,
   Timestamp,
+  doc,
+  getDoc,
+  setDoc,
 } from "firebase/firestore";
 import {
   getAuth,
@@ -189,6 +192,31 @@ export const getHistoricalData = async (period, date) => {
 };
 
 /* =======================
+   CONFIG DE LA APP
+======================= */
+
+const CONFIG_DOC = doc(db, "config", "app");
+
+const DEFAULT_CONFIG = {
+  appName: "Mr Lonche",
+  backgroundImage: "/Google_AI_Studio_2026-01-20T21_52_58861Z.png",
+  products: [
+    { id: "verdes", name: "verdes", price: 50 },
+    { id: "rojos", name: "rojos", price: 50 },
+    { id: "especiales", name: "especiales", price: 100 },
+  ],
+  categories: ["tortilla", "salsa", "proteina", "gas", "desechables", "otros"],
+};
+
+const getAppConfig = async () => {
+  const snap = await getDoc(CONFIG_DOC);
+  if (!snap.exists()) return DEFAULT_CONFIG;
+  return { ...DEFAULT_CONFIG, ...snap.data() };
+};
+
+const saveAppConfig = (config) => setDoc(CONFIG_DOC, config);
+
+/* =======================
    EXPORTS
 ======================= */
 
@@ -200,5 +228,7 @@ export {
   saveOrder,
   savePurchase,
   getDailyData,
-
+  getAppConfig,
+  saveAppConfig,
+  DEFAULT_CONFIG,
 };
