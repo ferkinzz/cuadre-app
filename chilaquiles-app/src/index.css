@@ -1,11 +1,4 @@
-/* Dejamos solo lo esencial. MUI se encargará del resto. */
+/* La imagen de fondo se aplica dinámicamente desde App.jsx según la configuración */
 body {
   margin: 0;
-  /* Usamos el nombre de archivo que me diste. Si lo renombraste, actualiza la URL. */
-  background-image: url('/Google_AI_Studio_2026-01-20T21_52_58861Z.png');
-  background-size: cover; /* Asegura que la imagen cubra todo el espacio */
-  background-position: center; /* Centra la imagen */
-  background-repeat: no-repeat; /* Evita que la imagen se repita */
-  background-attachment: fixed; /* Mantiene la imagen fija al hacer scroll */
-  min-height: 100vh; /* Asegura que el body ocupe al menos toda la altura de la pantalla */
 }
