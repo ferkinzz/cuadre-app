@@ -72,11 +72,10 @@ Si usas **Cloudflare Pages**, agrégalas en:
 
 ---
 
-## ¿Te fue útil?
+## Soporte
 
-Si Cuadre le ayuda a tu negocio, puedes apoyar el proyecto:
-**[paypal.me/fantactico](https://paypal.me/fantactico)**
+¿Encontraste un bug o tienes una sugerencia? Abre un issue en GitHub.
 
----
+¿Te gusta la app? Considera [invitarme un café ☕](https://paypal.me/fantactico).
 
-Hecho con ganas de que los negocios chidos cuadren 🤙
+Hecho con ♥ por [RTSI](https://rtsi.mx)
