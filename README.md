@@ -74,7 +74,7 @@ Si usas **Cloudflare Pages**, agrégalas en:
 
 ## Soporte
 
-¿Encontraste un bug o tienes una sugerencia? Abre un issue en GitHub.
+¿Encontraste un bug o tienes una sugerencia? Abre un [issue en GitHub](https://github.com/ferkinzz/cuadre-app/issues).
 
 ¿Te gusta la app? Considera [invitarme un café ☕](https://paypal.me/fantactico).
 
