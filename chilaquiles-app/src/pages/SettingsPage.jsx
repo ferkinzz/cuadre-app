@@ -6,6 +6,7 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
+import FavoriteIcon from '@mui/icons-material/Favorite';
 
 function SettingsPage() {
   const { config, updateConfig } = useConfig();
@@ -152,6 +153,24 @@ function SettingsPage() {
       <Button variant="contained" size="large" onClick={handleSave} disabled={saving}>
         {saving ? 'Guardando...' : 'Guardar cambios'}
       </Button>
+
+      <Divider />
+
+      <Box sx={{ textAlign: 'center', py: 1 }}>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+          ¿Te está siendo útil Cuadre?
+        </Typography>
+        <Button
+          variant="outlined"
+          color="error"
+          startIcon={<FavoriteIcon />}
+          href="https://paypal.me/fantactico"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Invítame un café
+        </Button>
+      </Box>
 
       <Snackbar open={feedback.open} autoHideDuration={3000} onClose={() => setFeedback(f => ({ ...f, open: false }))}>
         <Alert severity={feedback.severity}>{feedback.message}</Alert>
