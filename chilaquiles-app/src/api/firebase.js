@@ -198,14 +198,13 @@ export const getHistoricalData = async (period, date) => {
 const CONFIG_DOC = doc(db, "config", "app");
 
 const DEFAULT_CONFIG = {
-  appName: "Mr Lonche",
-  backgroundImage: "/Google_AI_Studio_2026-01-20T21_52_58861Z.png",
+  appName: "Cuadre",
+  backgroundImage: "",
   products: [
-    { id: "verdes", name: "verdes", price: 50 },
-    { id: "rojos", name: "rojos", price: 50 },
-    { id: "especiales", name: "especiales", price: 100 },
+    { id: "producto_1", name: "Producto 1", price: 50 },
+    { id: "producto_2", name: "Producto 2", price: 100 },
   ],
-  categories: ["tortilla", "salsa", "proteina", "gas", "desechables", "otros"],
+  categories: ["materia prima", "renta", "servicios", "transporte", "otros"],
 };
 
 const getAppConfig = async () => {
