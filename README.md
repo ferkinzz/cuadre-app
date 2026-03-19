@@ -1,6 +1,8 @@
-# 🌮 Chilaquiles App
+# Cuadre
 
-App gratuita para registrar ventas, compras y llevar el balance de tu negocio. Diseñada para ser simple y rápida de usar desde el celular.
+App gratuita para llevar las cuentas de tu negocio. Registra ventas, gastos y mira tu ganancia del día — desde el celular, sin complicaciones.
+
+Funciona para cualquier negocio: puesto de comida, tiendita, servicio, lo que sea. Tú defines los productos, los precios y las categorías desde la app.
 
 ---
 
@@ -10,14 +12,14 @@ App gratuita para registrar ventas, compras y llevar el balance de tu negocio. D
 - Registrar compras y gastos por categoría
 - Ver el resumen del día: ventas, gastos y ganancia estimada
 - Analizar datos históricos con gráficas por día, semana, mes o año
-- **Todo configurable:** nombre de la app, imagen de fondo, productos, precios y categorías desde la pantalla de Configuración — sin tocar código
+- Configurar todo desde la app: nombre del negocio, imagen de fondo, productos, precios y categorías — sin tocar código
 
 ---
 
 ## Próximamente
 
-**Versión Android (APK)** — disponible próximamente en Google Play Store.
-Almacenamiento local sin necesidad de cuenta, con opción de exportar tus datos en JSON.
+**Versión Android** — en camino a Google Play Store.
+Sin cuenta, sin Firebase: todo guardado en el celular, con opción de exportar tus datos en JSON.
 
 ---
 
@@ -37,7 +39,7 @@ Esta app usa **Firebase** como base de datos y autenticación. Necesitas crear u
 
 ### Variables de entorno requeridas
 
-Crea un archivo `.env` dentro de `chilaquiles-app/` con estos valores (los encuentras en la configuración de tu proyecto Firebase):
+Crea un archivo `.env` dentro de `chilaquiles-app/` con los valores de tu proyecto Firebase:
 
 ```
 VITE_FIREBASE_API_KEY=...
@@ -72,9 +74,9 @@ Si usas **Cloudflare Pages**, agrégalas en:
 
 ## ¿Te fue útil?
 
-Si esta app te ayuda con tu negocio, puedes invitarme un café:
+Si Cuadre le ayuda a tu negocio, puedes apoyar el proyecto:
 **[paypal.me/fantactico](https://paypal.me/fantactico)**
 
 ---
 
-Hecho con amor y chilaquiles 🤙
+Hecho con ganas de que los negocios chidos cuadren 🤙
